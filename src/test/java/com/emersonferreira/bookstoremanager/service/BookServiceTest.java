@@ -15,6 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 public class BookServiceTest {
 
@@ -28,12 +32,22 @@ public class BookServiceTest {
     void whenGivenExisteingIdThenReturnThisBook() throws BookNotFoundException {
         Book expectedFoundBook = BookUtils.createFakeBook();
 
-        Mockito.when(bookRepository.findById(expectedFoundBook.getId())).thenReturn(Optional.of(expectedFoundBook));
+        when(bookRepository.findById(expectedFoundBook.getId())).thenReturn(Optional.of(expectedFoundBook));
 
         BookDTO bookDTO = bookService.findById(expectedFoundBook.getId());
 
-        Assertions.assertEquals(expectedFoundBook.getName(), bookDTO.getName());
-        Assertions.assertEquals(expectedFoundBook.getIsbn(),bookDTO.getIsbn());
-        Assertions.assertEquals(expectedFoundBook.getPublisherName(),bookDTO.getPublisherName());
+        assertEquals(expectedFoundBook.getName(), bookDTO.getName());
+        assertEquals(expectedFoundBook.getIsbn(),bookDTO.getIsbn());
+        assertEquals(expectedFoundBook.getPublisherName(),bookDTO.getPublisherName());
+    }
+
+    @Test
+    void whenGivenUnexistingIdThenNotFindThrowAnException() {
+        var invalidId = 10L;
+
+        when(bookRepository.findById(invalidId))
+                .thenReturn(Optional.ofNullable(any(Book.class)));
+
+        assertThrows(BookNotFoundException.class, () -> bookService.findById(invalidId));
     }
 }
